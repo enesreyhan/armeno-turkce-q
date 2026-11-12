@@ -61,10 +61,14 @@ Other things to know:
 
 ## Keycap stickers
 
-[`stickers.html`](stickers.html) shows the layout and prints keycap stickers at real size (mm). It has presets for the **Keychron K3 Max** and the **AULA F75**.
+Ready-to-print A4 templates (47 stickers each, dashed cut lines):
 
-1. Measure the top of a keycap and set the size on the page.
-2. Print with Cmd+P at 100% scale ("Fit to page" off).
+- [Keychron K3 Max (13 mm)](templates/keychron-k3-max.pdf)
+- [AULA F75 (12.5 mm)](templates/aula-f75.pdf)
+
+Print at **100% scale** ("Fit to page" off), cut along the dashed lines, and stick each label on the key shown in its gray top-left letter (Turkish Q).
+
+Other keyboard or keycap size? Open [`stickers.html`](stickers.html) in a browser, measure the top of a keycap, set the size, and print with Cmd+P.
 
 ## Building from source
 

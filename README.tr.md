@@ -61,10 +61,14 @@ Bilinmesi gereken diğer noktalar:
 
 ## Tuş etiketleri
 
-[`stickers.html`](stickers.html) klavye düzenini gösteriyor ve tuş etiketlerini gerçek boyutta (mm) yazdırıyor. **Keychron K3 Max** ve **AULA F75** için hazır ayarları var.
+Yazdırmaya hazır A4 şablonlar (her birinde 47 etiket, kesik kesim çizgileri):
 
-1. Tuşun üst yüzeyini ölçüp boyutu sayfadan ayarlayın.
-2. Cmd+P ile %100 ölçekte yazdırın ("Sığdır" kapalı).
+- [Keychron K3 Max (13 mm)](templates/keychron-k3-max.pdf)
+- [AULA F75 (12,5 mm)](templates/aula-f75.pdf)
+
+**%100 ölçekte** yazdırın ("Sığdır" kapalı), kesik çizgilerden kesin ve her etiketi sol üstteki gri harfin (Türkçe Q) tuşuna yapıştırın.
+
+Başka bir klavye ya da tuş boyutu mu? [`stickers.html`](stickers.html) dosyasını tarayıcıda açın, tuşun üst yüzeyini ölçüp boyutu ayarlayın ve Cmd+P ile yazdırın.
 
 ## Kaynaktan derleme
 

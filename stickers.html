@@ -36,6 +36,7 @@
   .s .ar.long { font-size:calc(var(--size,13mm) * .34); }
   .s .sym { font-size:calc(var(--size,13mm) * .3); }
   .sheet-title { display:none; }
+  @page { size: A4; margin: 10mm; }
   @media print {
     body { background:#fff; padding:0; }
     .noprint { display:none; }
@@ -117,6 +118,8 @@ function render() {
 
 model.addEventListener('change', () => { size.value = MODELS[model.value].size; render(); });
 size.addEventListener('input', render);
+const fromUrl = new URLSearchParams(location.search).get('model');  // ?model=f75 for direct links / PDF export
+if (MODELS[fromUrl]) model.value = fromUrl;
 size.value = MODELS[model.value].size;
 render();
 </script>
