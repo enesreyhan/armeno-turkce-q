@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Armeno-Türkçe Etiketler</title>
+<style>
+  :root { --bg:#f6f5f2; --key:#ffffff; --mod:#dcdad4; --ink:#1d1d1f; --sub:#8a8780; --line:#b9b6ae; --arm:#9b2c2c; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:24px 16px; background:var(--bg); color:var(--ink);
+         font-family:-apple-system, "Helvetica Neue", "Noto Sans Armenian", sans-serif; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:32px 0 8px; }
+  p { color:var(--sub); font-size:13px; margin:4px 0 12px; max-width:720px; }
+  /* keyboard preview */
+  .kb { display:inline-flex; flex-direction:column; gap:4px; padding:12px; background:#2b2b2e; border-radius:12px; max-width:100%; overflow-x:auto; }
+  .row { display:flex; gap:4px; }
+  .k { --u:46px; width:calc(var(--u) * var(--w,1) + 4px * (var(--w,1) - 1)); height:var(--u); flex:none;
+       background:var(--key); border-radius:6px; position:relative; font-size:10px; }
+  .k.mod { background:var(--mod); color:#555; display:flex; align-items:center; justify-content:center; font-size:9px; }
+  .k.knob { border-radius:50%; background:#6b6b70; color:#ddd; }
+  .tr { position:absolute; left:5px; top:3px; color:var(--sub); font-size:10px; }
+  .up { position:absolute; right:5px; top:3px; color:var(--sub); font-size:10px; }
+  .ar { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding-top:8px;
+        font-size:19px; color:var(--arm); font-weight:600; white-space:nowrap; }
+  .ar.long { font-size:13px; }
+  .sym { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+         font-size:13px; line-height:1.15; }
+  /* print sheet */
+  .controls { font-size:13px; margin-bottom:12px; display:flex; gap:16px; flex-wrap:wrap; align-items:center; }
+  .controls input { width:56px; }
+  .sheet { display:flex; flex-wrap:wrap; gap:2mm; background:#fff; padding:5mm; width:fit-content; max-width:100%; }
+  .s { width:var(--size,13mm); height:var(--size,13mm); border:0.2mm dashed var(--line); position:relative; background:#fff; }
+  .s .tr, .s .up { font-size:calc(var(--size,13mm) * .2); left:.6mm; top:.3mm; }
+  .s .up { left:auto; right:.6mm; }
+  .s .ar { font-size:calc(var(--size,13mm) * .5); padding-top:calc(var(--size,13mm) * .12); }
+  .s .ar.long { font-size:calc(var(--size,13mm) * .34); }
+  .s .sym { font-size:calc(var(--size,13mm) * .3); }
+  .sheet-title { display:none; }
+  @media print {
+    body { background:#fff; padding:0; }
+    .noprint { display:none; }
+    .sheet { padding:0; }
+    .sheet-title { display:block; font-size:9pt; color:#666; margin:0 0 2mm; }
+  }
+</style>
+</head>
+<body>
+<div class="noprint">
+  <h1 id="title"></h1>
+  <p>Gri küçük harf: Türkçe Q'daki karşılığı · Kırmızı büyük harf: Ermeni çıktısı · Sağ üst: Shift ile büyük harf.</p>
+  <div class="controls">
+    <label>Klavye:
+      <select id="model">
+        <option value="k3">Keychron K3 Max</option>
+        <option value="f75">AULA F75</option>
+      </select>
+    </label>
+  </div>
+  <div class="kb" id="kb"></div>
+
+  <h2>Yazdırılacak etiketler</h2>
+  <p>Cmd+P ile yazdırırken ölçeği <b>%100</b> yap (“Sığdır” kapalı). Kesik çizgiden kes. Varsayılan boyutlar tahmindir: önce tuşun üst yüzeyini cetvelle ölç, sonra boyutu buradan ayarla. Her klavye için ayrı yazdır.</p>
+  <div class="controls">Etiket boyutu: <input id="size" type="number" min="8" max="18" step="0.5"> mm</div>
+</div>
+<p class="sheet-title" id="sheet-title"></p>
+<div class="sheet" id="sheet"></div>
+
+<script>
+// letter key: US print, Turkish Q letter, Armenian lower, Armenian upper · symbol key: US print, normal, shift
+const L = (us, tr, ar, AR) => ({ us, tr, ar, AR });
+const S = (us, n, s) => ({ us, n, s });
+const M = (label, w = 1) => ({ mod: label, w });
+
+// shortcut: non-letter keys (right column, top row, modifiers) are approximate, they get no stickers anyway
+const MODELS = {
+  k3:  { name: 'Keychron K3 Max', size: 13,   top: ['prt', 'del', '☼'], right: ['home', 'pgup', 'pgdn', 'end'],
+         bottom: [M('ctrl', 1.25), M('opt', 1.25), M('cmd', 1.25), M('', 6.25), M('cmd'), M('fn'), M('ctrl')] },
+  f75: { name: 'AULA F75',        size: 12.5, top: ['del', '◎'],       right: ['pgup', 'pgdn', 'home', 'end'],
+         bottom: [M('ctrl', 1.25), M('win', 1.25), M('alt', 1.25), M('', 6.25), M('alt'), M('fn'), M('ctrl')] },
+};
+
+const rowsFor = m => [
+  [M('esc'), ...'F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12'.split(' ').map(f => M(f)), ...m.top.map(t => M(t))],
+  [S('`','"','é'), S('1','1','՜'), S('2','2',"'"), S('3','3','^'), S('4','4','+'), S('5','5','%'), S('6','6','&'),
+   S('7','7','/'), S('8','8','('), S('9','9',')'), S('0','0','='), S('-','*','՞'), S('=','-','_'), M('⌫', 2), M(m.right[0])],
+  [M('tab', 1.5), L('q','q','ե','Ե'), L('w','w','ւ','Ւ'), L('e','e','է','Է'), L('r','r','ր','Ր'), L('t','t','թ','Թ'),
+   L('y','y','յ','Յ'), L('u','u','ու','Ու'), L('i','ı','ը','Ը'), L('o','o','օ','Օ'), L('p','p','փ','Փ'),
+   L('[','ğ','ղ','Ղ'), L(']','ü','իւ','Իւ'), S('\\',',',';'), M(m.right[1])],
+  [M('caps', 1.75), L('a','a','ա','Ա'), L('s','s','ս','Ս'), L('d','d','տ','Տ'), L('f','f','ֆ','Ֆ'), L('g','g','կ','Կ'),
+   L('h','h','հ','Հ'), L('j','j','ժ','Ժ'), L('k','k','ք','Ք'), L('l','l','լ','Լ'), L(';','ş','շ','Շ'),
+   L("'",'i','ի','Ի'), M('return', 2.25), M(m.right[2])],
+  [M('shift', 2.25), L('z','z','զ','Զ'), L('x','x','խ','Խ'), L('c','c','ճ','Ճ'), L('v','v','վ','Վ'), L('b','b','պ','Պ'),
+   L('n','n','ն','Ն'), L('m','m','մ','Մ'), L(',','ö','էօ','Էօ'), L('.','ç','ջ','Ջ'), S('/','։','․'),
+   M('shift', 1.75), M('↑'), M(m.right[3])],
+  [...m.bottom, M('←'), M('↓'), M('→')],
+];
+
+const face = k => k.ar
+  ? `<span class="tr">${k.tr}</span><span class="up">${k.AR}</span><span class="ar${k.ar.length > 1 ? ' long' : ''}">${k.ar}</span>`
+  : `<span class="sym"><span>${k.s}</span><span>${k.n}</span></span>`;
+
+const $ = id => document.getElementById(id);
+const model = $('model'), size = $('size');
+const applySize = () => $('sheet').style.setProperty('--size', size.value + 'mm');
+
+function render() {
+  const m = MODELS[model.value], rows = rowsFor(m);
+  $('title').textContent = `Armeno-Türkçe Q (19. yy, Batı Ermenicesi) · ${m.name}`;
+  $('sheet-title').textContent = `Armeno-Türkçe Q · ${m.name} · ${size.value} mm`;
+  $('kb').innerHTML = rows.map(r => `<div class="row">${r.map(k => k.mod !== undefined
+    ? `<div class="k mod${k.mod === '◎' ? ' knob' : ''}" style="--w:${k.w}">${k.mod}</div>`
+    : `<div class="k">${face(k)}</div>`).join('')}</div>`).join('');
+  $('sheet').innerHTML = rows.flat().filter(k => k.mod === undefined)
+    .map(k => `<div class="s">${face(k)}</div>`).join('');
+  applySize();
+}
+
+model.addEventListener('change', () => { size.value = MODELS[model.value].size; render(); });
+size.addEventListener('input', render);
+size.value = MODELS[model.value].size;
+render();
+</script>
+</body>
+</html>
